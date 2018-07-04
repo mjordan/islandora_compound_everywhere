@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Installation hooks for Islandora Compound Everywhere.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function islandora_compound_everywhere_uninstall() {
+  $vars = array(
+    'islandora_compound_everywhere_selected_cmodels',
+  );
+  array_walk($vars, 'variable_del');
+}

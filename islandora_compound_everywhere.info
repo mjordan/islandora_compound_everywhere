@@ -1,0 +1,7 @@
+name = Islandora Compound Everywhere 
+description = "Provide a block containing children of non-compoundCModel objects."
+package = Islandora Tools
+core = 7.x
+configure = admin/islandora/tools/compound_everywhere
+dependencies[] = islandora
+dependencies[] = islandora_compound_object
