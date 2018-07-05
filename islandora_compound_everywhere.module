@@ -41,7 +41,7 @@ function islandora_compound_everywhere_block_info() {
  */
 function islandora_compound_everywhere_block_view($delta) {
   module_load_include('inc', 'islandora_compound_everywhere', 'includes/utilities');
-  $to_render = array();
+  $block = array();
   if ($delta == 'islandora_compound_e_block') {
     $object = menu_get_object('islandora_object', 2);
     if ($object) {
@@ -52,7 +52,30 @@ function islandora_compound_everywhere_block_view($delta) {
       }
     }
   }
-  return $to_render;
+  return $block;
+}
+
+/**
+ * Implements hook_islandora_compound_object_children_added_to_parent().
+ */
+function islandora_compound_everywhere_islandora_compound_object_children_added_to_parent($objects, $parent_pids) {
+  // By default, the parent will get the TN of its first child. We don't
+  // want that, so we regenerate the parent's TN.
+  module_load_include('inc', 'islandora', 'includes/derivatives');
+  $options = array('force' => TRUE, 'destination_dsid' => 'TN');
+  $object = islandora_object_load($parent_pids[0]);
+  islandora_do_derivatives($object, $options);
+
+  // Remove the collection membership of the added children.
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  foreach ($objects as $child_object) {
+    // There should only be one collection but it is possible
+    // there are multiple.
+    $collections = islandora_get_parents_from_rels_ext($child_object);
+    foreach ($collections as $collection) {
+      $child_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $collection->id);
+    }
+  }
 }
 
 /**
@@ -75,8 +98,7 @@ function islandora_compound_everywhere_preprocess_islandora_compound_prev_next(a
 
   $variables['parent_tn'] = NULL;
   $parent_object = islandora_object_load($variables['parent_pid']);
-  // if ($parent_object && !in_array(ISLANDORA_COMPOUND_OBJECT_CMODEL, $parent_object->models)) {
-  if ($parent_object) {
+  if ($parent_object && !in_array(ISLANDORA_COMPOUND_OBJECT_CMODEL, $parent_object->models)) {
     if (isset($parent_object['TN']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $parent_object['TN'])) {
       $variables['parent_tn'] = 'islandora/object/' . $parent_object->id . '/datastream/TN/view';
     }
@@ -88,8 +110,8 @@ function islandora_compound_everywhere_preprocess_islandora_compound_prev_next(a
   // If the parent TN is not set, only show children if there's more than one.
   // If the parent TN is set, show all children even if there's only one.
 
-  // if (($variables['child_count'] > 1 && !$variables['parent_tn']) || ($variables['child_count'] > 0 && $variables['parent_tn'])) {
-  if (($variables['child_count'] > 0 && !$variables['parent_tn']) || ($variables['child_count'] > 0 && $variables['parent_tn'])) {
+  if (($variables['child_count'] > 1 && !$variables['parent_tn']) || ($variables['child_count'] > 0 && $variables['parent_tn'])) {
+  // if (($variables['child_count'] > 0 && !$variables['parent_tn']) || ($variables['child_count'] > 0 && $variables['parent_tn'])) {
     for ($i = 0; $i < count($variables['siblings']); $i += 1) {
       $sibling = array();
       $sibling['pid'] = $variables['siblings'][$i];

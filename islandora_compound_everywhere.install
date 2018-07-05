@@ -8,6 +8,13 @@
 /**
  * Implements hook_uninstall().
  */
+function islandora_compound_everywhere_install() {
+  db_query("UPDATE {system} SET weight = 10 WHERE name = 'islandora_compound_everywhere'");
+}
+
+/**
+ * Implements hook_uninstall().
+ */
 function islandora_compound_everywhere_uninstall() {
   $vars = array(
     'islandora_compound_everywhere_selected_cmodels',
