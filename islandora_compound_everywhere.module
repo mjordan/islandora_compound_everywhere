@@ -59,21 +59,16 @@ function islandora_compound_everywhere_block_view($delta) {
  * Implements hook_islandora_compound_object_children_added_to_parent().
  */
 function islandora_compound_everywhere_islandora_compound_object_children_added_to_parent($objects, $parent_pids) {
-  // By default, the parent will get the TN of its first child. We don't
-  // want that, so we regenerate the parent's TN.
-  module_load_include('inc', 'islandora', 'includes/derivatives');
-  $options = array('force' => TRUE, 'destination_dsid' => 'TN');
-  $object = islandora_object_load($parent_pids[0]);
-  islandora_do_derivatives($object, $options);
-
-  // Remove the collection membership of the added children.
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  foreach ($objects as $child_object) {
-    // There should only be one collection but it is possible
-    // there are multiple.
-    $collections = islandora_get_parents_from_rels_ext($child_object);
-    foreach ($collections as $collection) {
-      $child_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $collection->id);
+  if (variable_get('islandora_compound_everywhere_remove_child_collection_membership', 0)) {
+    // Remove the collection membership of the added children.
+    module_load_include('inc', 'islandora', 'includes/utilities');
+    foreach ($objects as $child_object) {
+      // There should only be one collection but it is possible
+      // there are multiple.
+      $collections = islandora_get_parents_from_rels_ext($child_object);
+      foreach ($collections as $collection) {
+        $child_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $collection->id);
+      }
     }
   }
 }

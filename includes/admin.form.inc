@@ -50,6 +50,13 @@ function islandora_compound_everywhere_admin_form($form, $form_settings) {
     '#weight' => 0,
   );
 
+  $form['islandora_compound_everywhere_remove_child_collection_membership'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Remove child collection membership'),
+    '#default_value' => variable_get('islandora_compound_everywhere_remove_child_collection_membership', 0),
+    '#description' => t("Check this option if you want to automatically remove child objects' collection membership when they are added to their parents."),
+  );
+
   return $form;
 }
 
@@ -59,5 +66,6 @@ function islandora_compound_everywhere_admin_form($form, $form_settings) {
 function islandora_compound_everywhere_admin_form_submit(array $form, array &$form_state) {
   $enabled = array_keys(array_filter($form_state['values']['compound_everywhere_block_table']));
   variable_set('islandora_compound_everywhere_selected_cmodels', $enabled);
+  variable_set('islandora_compound_everywhere_remove_child_collection_membership', $form_state['values']['islandora_compound_everywhere_remove_child_collection_membership']);
   drupal_set_message(t("Configuration saved."));
 }
